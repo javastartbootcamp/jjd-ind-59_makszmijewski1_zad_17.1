@@ -1,9 +1,10 @@
 package pl.javastart.streamsexercise;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public class Payment {
+public class Payment implements Comparable<Payment> {
 
     private User user;
     private ZonedDateTime paymentDate;
@@ -37,5 +38,27 @@ public class Payment {
 
     public void setPaymentItems(List<PaymentItem> paymentItems) {
         this.paymentItems = paymentItems;
+    }
+
+    @Override
+    public int compareTo(Payment o) {
+        return -paymentDate.compareTo(o.paymentDate);
+    }
+
+    public int countFinalPrice() {
+        BigDecimal finalPrice = BigDecimal.ZERO;
+        for (PaymentItem paymentItem : paymentItems) {
+            finalPrice = finalPrice.add(paymentItem.getFinalPrice());
+        }
+        return finalPrice.intValue();
+    }
+
+    public BigDecimal countDiscount() {
+        BigDecimal discount = BigDecimal.ZERO;
+        for (PaymentItem paymentItem : paymentItems) {
+            BigDecimal difference = paymentItem.getRegularPrice().subtract(paymentItem.getFinalPrice());
+            discount = discount.add(difference);
+        }
+        return discount;
     }
 }
