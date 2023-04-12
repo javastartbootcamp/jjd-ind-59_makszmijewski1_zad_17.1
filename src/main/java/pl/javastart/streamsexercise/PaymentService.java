@@ -45,7 +45,7 @@ class PaymentService {
     }
 
     /*
-    Znajdź i zwróć płatności dla wskazanego miesiąca
+    Znajdź i zwróć płatności dla wskazanego miesiącca
      */
     List<Payment> findPaymentsForGivenMonth(YearMonth yearMonth) {
         return paymentRepository
