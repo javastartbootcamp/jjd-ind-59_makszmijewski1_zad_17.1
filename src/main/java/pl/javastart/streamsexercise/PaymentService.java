@@ -51,7 +51,8 @@ class PaymentService {
         return paymentRepository
                 .findAll()
                 .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == yearMonth.getMonth())
+                .filter(payment -> payment.getPaymentDate().getMonth() == yearMonth.getMonth()
+                        && payment.getPaymentDate().getYear() == yearMonth.getYear())
                 .toList();
     }
 
@@ -73,7 +74,7 @@ class PaymentService {
         return paymentRepository
                 .findAll()
                 .stream()
-                .filter(payment -> payment.getPaymentItems().size() < 2)
+                .filter(payment -> payment.getPaymentItems().size() == 1)
                 .collect(Collectors.toSet());
     }
 
@@ -81,11 +82,8 @@ class PaymentService {
     Znajdź i zwróć nazwy produktów sprzedanych w aktualnym miesiącu
      */
     Set<String> findProductsSoldInCurrentMonth() {
-        return paymentRepository
-                .findAll()
+        return findPaymentsForCurrentMonth()
                 .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == dateTimeProvider.zonedDateTimeNow().getMonth()
-                        && payment.getPaymentDate().getYear() == dateTimeProvider.zonedDateTimeNow().getYear())
                 .map(Payment::getPaymentItems)
                 .flatMap(List::stream)
                 .map(PaymentItem::getName)
@@ -96,13 +94,10 @@ class PaymentService {
     Policz i zwróć sumę sprzedaży dla wskazanego miesiąca
      */
     BigDecimal sumTotalForGivenMonth(YearMonth yearMonth) {
-        Integer sum = paymentRepository
-                .findAll()
+        Integer sum = findPaymentsForGivenMonth(yearMonth)
                 .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == yearMonth.getMonth()
-                        && payment.getPaymentDate().getYear() == yearMonth.getYear())
-                .map(payment -> payment.countFinalPrice())
-                .reduce(0, (result, next) -> result + next);
+                .map(Payment::countFinalPrice)
+                .reduce(0, Integer::sum);
 
         return BigDecimal.valueOf(sum);
     }
@@ -111,13 +106,10 @@ class PaymentService {
     Policz i zwróć sumę przeyznanaych rabatów dla wskazanego miesiąca
      */
     BigDecimal sumDiscountForGivenMonth(YearMonth yearMonth) {
-        return paymentRepository
-                .findAll()
+        return findPaymentsForGivenMonth(yearMonth)
                 .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == yearMonth.getMonth()
-                        && payment.getPaymentDate().getYear() == yearMonth.getYear())
-                .map(payment -> payment.countDiscount())
-                .reduce(BigDecimal.ZERO, (result, next) -> result.add(next));
+                .map(Payment::countDiscount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /*
