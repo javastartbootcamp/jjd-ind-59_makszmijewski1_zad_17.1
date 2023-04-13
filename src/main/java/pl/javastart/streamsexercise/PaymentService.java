@@ -36,12 +36,7 @@ class PaymentService {
     Znajdź i zwróć płatności dla aktualnego miesiąca
      */
     List<Payment> findPaymentsForCurrentMonth() {
-        return paymentRepository
-                .findAll()
-                .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == dateTimeProvider.zonedDateTimeNow().getMonth()
-                        && payment.getPaymentDate().getYear() == dateTimeProvider.zonedDateTimeNow().getYear())
-                .toList();
+        return findPaymentsForGivenMonth(YearMonth.now());
     }
 
     /*
@@ -51,8 +46,7 @@ class PaymentService {
         return paymentRepository
                 .findAll()
                 .stream()
-                .filter(payment -> payment.getPaymentDate().getMonth() == yearMonth.getMonth()
-                        && payment.getPaymentDate().getYear() == yearMonth.getYear())
+                .filter(payment -> YearMonth.from(payment.getPaymentDate()).equals(dateTimeProvider.yearMonthNow()))
                 .toList();
     }
 
